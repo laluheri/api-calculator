@@ -28,7 +28,6 @@ var server = http.createServer(app);
  */
 
 db.on("open", function () {
-  console.log("SUCCESS CONNECT TO DATABASE");
   server.listen(port);
   server.on("error", onError);
   server.on("listening", onListening);

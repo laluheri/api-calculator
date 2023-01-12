@@ -8,4 +8,5 @@ module.exports = {
   dbPort: process.env.DB_PORT,
   dbPass: process.env.DB_PASS,
   dbName: process.env.DB_NAME,
+  timeZone: process.env.TZ,
 };

@@ -8,8 +8,6 @@ const userRouter = require("./app/login/router");
 const accessRouter = require("./app/access/router");
 var app = express();
 
-console.log("ENV " + config.serviceName);
-
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
