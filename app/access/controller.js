@@ -17,15 +17,28 @@ const getAll = async (req, res, next) => {
 
 const getTImeAccess = async (req, res, next) => {
   try {
-    let milliseconds = 0;
-    const countAccess = await Access.count();
-    const user = await Access.find();
-    for (let i = 0; i < countAccess; i++) {
-      const timeAccess = user[i].updatedAt - user[i].createdAt;
-      milliseconds = milliseconds + timeAccess;
+    let data = [];
+    const total_time = await Access.aggregate([
+      {
+        $group: {
+          _id: { $month: "$login_time" },
+          total_time: { $sum: "$total_time" },
+        },
+      },
+    ]);
+    for (let i = 0; i < total_time.length; i++) {
+      let mhs = convertMsToHM(total_time[i].total_time);
+      let minutes = Math.floor((total_time[i].total_time / 1000 / 60) % 60);
+      data = [
+        ...data,
+        {
+          month: total_time[i]._id,
+          total_in_minutes: minutes,
+          total_in_hour: mhs,
+        },
+      ];
     }
-    const mhs = convertMsToHM(milliseconds);
-    return res.json({ total_time: mhs });
+    return res.json({ total_time: data });
   } catch (error) {}
 };
 
@@ -49,8 +62,6 @@ const getLongTime = async (req, res, next) => {
 
     for (let i = 0; i < data.length; i++) {
       const timeAccess = data[i]._id.timeLogout - data[i]._id.timeLogin;
-      console.log(">>>>timeAccess");
-      console.log(timeAccess);
       milliseconds = milliseconds + timeAccess;
     }
     const mhs = convertMsToHM(milliseconds);

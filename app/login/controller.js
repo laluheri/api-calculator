@@ -30,7 +30,11 @@ const login = async (req, res, next) => {
     const { email, password } = req.body;
     let user = await User.findOne({ email });
     if (user && user.password === password) {
-      const access = new Access({ user: user._id });
+      const access = new Access({
+        user: user._id,
+        login_time: new Date(),
+        logout_time: new Date(),
+      });
       await access.save();
       return res.json({
         message: "success",
@@ -50,19 +54,23 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    const user = req.body.user;
-    console.log(">>>user");
-    console.log(user);
-    const lastLogin = await Access.findOne({ user }).sort("-createdAt");
-    console.log(lastLogin);
+    const payload = req.body.user;
+    const userAccess = await Access.findOne({ payload }).sort("-createdAt");
+    const total_time = new Date() - userAccess.login_time;
+    console.log(">>total_time");
+    console.log(total_time);
     let access = await Access.findOneAndUpdate(
       {
-        _id: lastLogin._id,
+        _id: userAccess._id,
       },
-      { updatedAt: new Date() },
+      {
+        logout_time: new Date(),
+        total_time: total_time,
+      },
       { new: true }
     );
-    return res.json(lastLogin);
+
+    return res.json(userAccess);
   } catch (err) {
     err.message;
   }
