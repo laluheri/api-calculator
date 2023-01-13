@@ -29,7 +29,39 @@ const getTImeAccess = async (req, res, next) => {
   } catch (error) {}
 };
 
+const getLongTime = async (req, res, next) => {
+  try {
+    let milliseconds = 0;
+    const data = await Access.aggregate([
+      {
+        $group: {
+          _id: {
+            userId: "$user",
+            day: { $dayOfMonth: "$createdAt" },
+            month: { $month: "$createdAt" },
+            year: { $year: "$createdAt" },
+            timeLogin: "$createdAt",
+            timeLogout: "$updatedAt",
+          },
+        },
+      },
+    ]);
+
+    for (let i = 0; i < data.length; i++) {
+      const timeAccess = data[i]._id.timeLogout - data[i]._id.timeLogin;
+      console.log(">>>>timeAccess");
+      console.log(timeAccess);
+      milliseconds = milliseconds + timeAccess;
+    }
+    const mhs = convertMsToHM(milliseconds);
+    return res.json({ total_time: mhs });
+  } catch (err) {
+    res.json(err);
+  }
+};
+
 module.exports = {
   getAll,
   getTImeAccess,
+  getLongTime,
 };
