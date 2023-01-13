@@ -34,7 +34,6 @@ const getTImeAccess = async (req, res, next) => {
         {
           month: total_time[i]._id,
           total_in_minutes: minutes,
-          total_in_hour: mhs,
         },
       ];
     }
